@@ -69,8 +69,17 @@ def select_up_to_limit(
     selected: list[str] = []
     for item in collection:
         item_size = sum(size for _, size in item if size)
-        if total + item_size <= max_bytes:
-            total += item_size
-            selected.extend(path for path, _ in item)
+        is_pack = len(item) > 1
+        if is_pack:
+            # packs are atomic: once a pack is reached in the shuffled order,
+            # include it whole even if doing so exceeds the limit
+            if total < max_bytes:
+                total += item_size
+                selected.extend(path for path, _ in item)
+        else:
+            # standalones are bounded strictly
+            if total + item_size <= max_bytes:
+                total += item_size
+                selected.extend(path for path, _ in item)
     logger.info("selected %d files (%.2f GB)", len(selected), total / 1024**3)
     return selected
