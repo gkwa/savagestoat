@@ -1,5 +1,4 @@
 import logging
-import os
 import pathlib
 import subprocess
 import sys
@@ -10,7 +9,7 @@ _LIST_FILE = "/tmp/savagestoat-rsync-list.txt"
 
 
 def rsync_to_staging(paths: list[str], staging: str) -> None:
-    os.makedirs(staging, exist_ok=True)
+    pathlib.Path(staging).mkdir(parents=True, exist_ok=True)
     with open(_LIST_FILE, "w") as f:
         for p in paths:
             f.write(p.lstrip("/") + "\n")
